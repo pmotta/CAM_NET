@@ -1,0 +1,36 @@
+file <- read.csv(file.choose(),header = TRUE, colClasses = "character") 
+str(file)
+#
+file[,4:6] <- as.numeric(as.matrix(file[,4:6])) # convert age, price and number in numeric (check the positions of the columns)
+#
+library(plyr)
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+#
+table(file$animal)
+#
+# DENSITY PLOT OF THE PRICE OF THE 4 CATEGORIES
+ggplot(file, aes(price,..count.., fill=animal)) +
+  geom_density(data=file, alpha=1/2) +
+  ggtitle("Market Price Densities") +
+  xlab("Price (x1000 FCFA)") + ylab("Counts(density * n)") 
+#
+# HISTOGRAMS OF THE SINGLE CATEGORIES PRICES 
+ggplot(data=file, aes(x=price, fill=animal)) + 
+  geom_bar(alpha=1/2) + 
+  geom_histogram(binwidth=10) +
+  ggtitle("Price per Category") +
+  xlab("Price (x1000 FCFA)") + ylab("Counts") +
+  facet_wrap(~animal, scale = "free") 
+# 
+# Plotting PRICE VARIATION OVER TIME or ANIMALS NUMBER OVER TIME:
+#
+file$month <- substr(as.character(file$date),4,5) # create a new char var according to the month
+ggplot(file, aes(x=month, y=price, col=animal)) + stat_summary(fun.y="mean", geom="line") 
+#
+# there is a BUG that prevents summary stat from working with line geom, it works with geom point
+ggplot(file, aes(x=month, y=price, col=animal)) + stat_summary(fun.y="mean", geom="point")
+#
+# so probably need to calculate mean outside ggplot, but not sure how to do it as it's a combination of month snd animal, see here:
+aggregate( price~month*animal, file, mean )
