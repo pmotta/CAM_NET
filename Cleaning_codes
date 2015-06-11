@@ -1,0 +1,85 @@
+#############################################
+# CLEANING CODES
+#############################################
+#
+file <- read.csv(file.choose(),header = TRUE, colClasses = "character") 
+#
+file <- select(file, -starts_with("o")) # takes out a column which anme starts with o, in case the origin is in the file
+# 
+# set blanks to zero
+sort_blanks <- function(X){
+  X[X == ""] <- "0"
+  return(as.numeric(as.character(X)))
+}
+#
+file[,4:6] <- sort_blanks(as.matrix(file[,4:6])) # applies the fx over the selected columns 
+#
+str(file) # type of variables
+#
+# to convert a character column to numeric: problem = if there is even just one character element in the vector (like the NA) it does not allow me and gives a series of warnings 
+file <- transform(file, price = as.numeric(price), age = as.numeric(age))
+#
+write.csv(file, file = "......csv") # save this version
+
+###############################################
+# A) FILES ALREADY WITH ONE OBSERVATION PER ROW
+###############################################
+# Where need to assign correct category according to the reported age
+# where there are STEERS:
+result$type <-  ifelse (result$animal=="cow" & result$age<4 | result$animal=="heifer" & result$age<4, "heifers",
+                        ifelse (result$animal=="cow" & result$age>3 | result$animal=="heifer" & result$age>3, "cows",
+                                ifelse (result$animal=="bull" & result$age<4 | result$animal=="young.bull" & result$age<4, "young_bull",
+                                        ifelse(result$animal=="bull" & result$age>3|result$animal=="young.bull" & result$age>3,"bull",
+                                               "steer"))))
+# last line not always required (steers are not in all the files)
+#
+write.csv(file, file = "......csv")
+# 
+###############################################
+# B) FILES WITH MULTIPLE OBSERVATIONS PER ROW
+###############################################
+# needed to reshape the files before check correct category/age because of mutliple obs:
+#
+file <- gather(file, key, value, bull:heifer) %>% # N.B. BULL TO HEIFER MAY CHANCE ACCORDING TO THE FILES
+  filter(value!=0 & value!="") # take out rows where value =0 or is NULL
+#
+filter(file, !is.na(age)&!is.na(price)) # take out where price and ages are NAs
+#
+file$row <- 1:nrow(file) # add clumn with ordered numbers
+#
+file$value <- as.numeric(as.character(file$value))
+file$price <- as.numeric(as.character(file$price))
+file$age <- as.numeric(as.character(file$age))
+#
+str(file)
+#
+# this fx  splits the rows with multiple animals 
+expand_ROW <- function(DAT){
+  if (DAT$value !=1)stop #("something wrong - should only do one row at a time!!!!")
+  return(data.frame(date = DAT$date,
+                    animal = DAT$key,
+                    number = seq(1, DAT$value), # here tried various options but was not assigning the correct value of one when splitting (see below)
+                    age = DAT$age,
+                    price = DAT$price / DAT$value))
+}
+# P.S. omitted age where was not included in the original file
+result <- ddply(file, "row", expand_ROW) %>% select(-row) 
+result$number <- 1 # as the fx was splitting but not asigning value of 1, but counting here need to set the numbers as 1
+#
+# to round up decimals of the prices splitted from multiple animals and convert to numeric:
+result <- transform(result, price = round(as.numeric(price),0)) # to convert price back to numeric and round up decimals
+result <- transform(result, age = as.numeric(as.character(age)))
+#
+# now ok to assign the right classification according the age:
+result$type <-  ifelse (result$animal=="cow" & result$age<4 | result$animal=="heifer" & result$age<4, "heifers",
+                        ifelse (result$animal=="cow" & result$age>3 | result$animal=="heifer" & result$age>3, "cows",
+                                ifelse (result$animal=="bull" & result$age<4 | result$animal=="young.bull" & result$age<4, "young_bull",
+                                        ifelse(result$animal=="bull" & result$age>3|result$animal=="young.bull" & result$age>3,"bull",
+                                               "steer"))))
+#
+write.csv(result, file = "......_exp_age.csv")
+#
+###################################################################
+# RESHAPED ALSO FILES FROM A) to have same working files:
+#
+# same fx used above
