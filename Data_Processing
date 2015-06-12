@@ -1,7 +1,12 @@
 #######################################################################
 # ASSIGNMENT of ORIGIN/DESTINATION to the single observations/animal
 #######################################################################
-# 
+
+library(plyr)
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+
 # the following generates a random sequence of destinations/origins
 example <- sample(c("ngaoundere", "likok","martap"), size=nrow(file), replace=T)
 file <- cbind(file, example) # include the new var in the df
