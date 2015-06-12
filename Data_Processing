@@ -13,11 +13,12 @@ file <- cbind(file, example) # include the new var in the df
 #
 # now need to assign each obs to a specific label (location) according to a %
 # (e.g. 10 to A, 50 to B, 40 to C) but also to repeat this assignment evry month on the df
-# otherwise it would not respet the real monthly flow of animals but only a static picture of the year
+# otherwise it would not respect the real monthly flow of animals but only a static picture of the year
 #
 # In my total blankness I thought that maybe a sort of "probability apprach" could be used to do that?
 # in which we could define the probability of the obs to come from or going to according to the 
 # information we have from the questionnaires? do you think could be a good approach?
 # 
-# I've seen saple() has a prob argument but doesn't seem to work for this purpose
+# I've seen sample() has a prob argument but doesn't seem to work for this purpose
 #
+# or better writing a fx that actually assings a label for every animal through this approach?
