@@ -1,7 +1,10 @@
 #############################################
 # CLEANING CODES
 #############################################
-#
+
+library(plyr)
+library(dplyr)
+
 file <- read.csv(file.choose(),header = TRUE, colClasses = "character") 
 #
 file <- select(file, -starts_with("o")) # takes out a column which anme starts with o, in case the origin is in the file
