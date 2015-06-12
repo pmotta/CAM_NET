@@ -1,6 +1,11 @@
 #############################################
 # EXPL MARKETS
 #############################################
+
+library(plyr)
+library(dplyr)
+library(ggplot2)
+
 file <- read.csv(file.choose(),header = TRUE, colClasses = "character") 
 str(file)
 #
